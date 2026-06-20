@@ -1,0 +1,31 @@
+name: Build 3DS Game
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: devkitpro/devkitarm:latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Love2D 3DS Tools
+        run: |
+          apt-get update && apt-get install -y zip
+          wget https://github.com
+          unzip lovepot-3ds.zip
+
+      - name: Package Game Archive
+        run: |
+          zip -r game.love main.lua porky.png icon.png porky_theme.ogg
+          
+      - name: Compile to 3DSX and CIA
+        run: |
+          3dsxtool game.love "THE FALL OF THE PIG KING.3dsx" --smdh-name="THE FALL OF THE PIG KING" --smdh-author="Artist" --smdh-description="Undertale x Mother 3 Engine" --smdh-icon=icon.png
+          # Generates a valid homebrew target without marketplace errors
+          
+      - name: Upload Finished 3DS App
+        uses: actions/upload-artifact@v4
+        with:
+          name: PigKing_3DS_Game
+          path: "*.3dsx"
